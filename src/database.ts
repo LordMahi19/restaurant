@@ -67,13 +67,19 @@ function initDb() {
         // Seed simple data if empty
         db.get("SELECT count(*) as count FROM menu_items", (err, row: any) => {
             if (row && row.count === 0) {
-                seedData();
+                seedMenuItems();
+            }
+        });
+
+        db.get("SELECT count(*) as count FROM ingredients", (err, row: any) => {
+            if (row && row.count === 0) {
+                seedIngredients();
             }
         });
     });
 }
 
-function seedData() {
+function seedMenuItems() {
     const items = [
         { name: 'Beef Pizza', description: 'Delicious beef pizza', price: 12.0, category: 'pizza', tags: 'beef', image_url: '/images/menu/beef-pizza.jpg' },
         { name: 'Chicken Pizza', description: 'Tasty chicken pizza', price: 11.0, category: 'pizza', tags: 'chicken', image_url: '/images/menu/chicken-pizza.jpg' },
@@ -91,7 +97,10 @@ function seedData() {
         insert.run(item.name, item.description, item.price, item.category, item.tags, item.image_url);
     });
     insert.finalize();
+    console.log("Seeded menu items.");
+}
 
+function seedIngredients() {
     const ingredients = [
         { name: 'Pepperoni', type: 'meat', price: 1.5 },
         { name: 'Ham', type: 'meat', price: 1.5 },
@@ -113,7 +122,7 @@ function seedData() {
     });
     insertIng.finalize();
 
-    console.log("Seeded database with initial data.");
+    console.log("Seeded ingredients.");
 }
 
 export function getAllMenuItems() {

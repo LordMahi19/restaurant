@@ -11,25 +11,23 @@
 
 <body>
     <header>
-        <div class="logo">
-            <h1 style="margin:0;">Gourmet Pizza & Kebab</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="menu.html">Menu</a></li>
+        <nav style="flex: 1; display: flex; justify-content: center;">
+            <ul style="display: flex; gap: 20px; list-style: none; padding: 0; margin: 0;">
+
+                <li><a href="menu.html" class="active">Menu</a></li>
                 <li><a href="custom.html">Custom Order</a></li>
-                <li><a href="contact.html">Contact Us</a></li>
+
+                <li><a href="admin.html">Staff Login</a></li>
             </ul>
         </nav>
         <div id="cart-indicator" style="cursor:pointer;" onclick="toggleCart()">Cart (0)</div>
     </header>
 
     <main class="container">
-        <h1>Our Menu</h1>
+
 
         <!-- Filters -->
-        <div class="filters">
+        <div class="filters" style="margin-top: 20px;">
             <button class="filter-btn" data-filter="beef" onclick="toggleFilter('beef')">Beef</button>
             <button class="filter-btn" data-filter="chicken" onclick="toggleFilter('chicken')">Chicken</button>
             <button class="filter-btn" data-filter="vegetarian" onclick="toggleFilter('vegetarian')">Vegetarian</button>
@@ -56,44 +54,65 @@
             <br><br>
             <button class="btn" onclick="checkout()">Checkout</button>
         </div>
-        <!-- Checkout Modal -->
-        <div id="checkout-modal" class="modal"
-            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
-            <div class="modal-content">
-                <h2>Checkout</h2>
-                <form id="checkout-form" onsubmit="submitOrder(event)">
-                    <div style="margin-bottom:10px;">
-                        <label>Order Type:</label>
-                        <label><input type="radio" name="orderType" value="delivery" checked
-                                onclick="toggleAddress(true)"> Delivery</label>
-                        <label><input type="radio" name="orderType" value="pickup" onclick="toggleAddress(false)">
-                            Pickup</label>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>Checkout</h2>
+            <form id="checkout-form" onsubmit="submitOrder(event)">
+                <div class="size-selector" style="margin-bottom: 25px;">
+                    <div class="radio-group" style="display: flex; gap: 10px; justify-content: center;">
+                        <label style="flex: 1; text-align: center; margin: 0;">
+                            <input type="radio" name="orderType" value="delivery" checked onclick="toggleAddress(true)">
+                            Delivery
+                        </label>
+                        <label style="flex: 1; text-align: center; margin: 0;">
+                            <input type="radio" name="orderType" value="pickup" onclick="toggleAddress(false)">
+                            Pickup
+                        </label>
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <label>Name:</label>
-                        <input type="text" id="cust-name" required style="width:100%; padding:5px; margin-top:5px;">
-                    </div>
-                    <div style="margin-bottom:10px;">
-                        <label>Phone:</label>
-                        <input type="tel" id="cust-phone" required style="width:100%; padding:5px; margin-top:5px;">
-                    </div>
-                    <div id="address-field" style="margin-bottom:10px;">
-                        <label>Address:</label>
-                        <input type="text" id="cust-address" required style="width:100%; padding:5px; margin-top:5px;">
-                    </div>
-                    <div style="margin-bottom:10px;">
-                        <label>Note (optional):</label>
-                        <textarea id="cust-note" style="width:100%; padding:5px; margin-top:5px;"></textarea>
-                    </div>
-                    <div style="text-align:right;">
-                        <button type="button" class="btn" onclick="closeCheckoutModal()">Cancel</button>
-                        <button type="submit" class="btn">Place Order</button>
-                    </div>
-                </form>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="text" id="cust-name" placeholder="Full Name" required>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="tel" id="cust-phone" placeholder="Phone Number" required>
+                </div>
+                <div id="address-field" style="margin-bottom:15px;">
+                    <input type="text" id="cust-address" placeholder="Delivery Address" required>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <textarea id="cust-note" placeholder="Note (optional)" style="height: 100px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn" style="flex: 1; opacity: 0.8;"
+                        onclick="closeCheckoutModal()">Cancel</button>
+                    <button type="submit" class="btn" style="flex: 2;">Place Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <h4>Visit Us</h4>
+                <p>123 Pizza Street, Food City</p>
+                <p>Open Daily: 11am - 11pm</p>
+            </div>
+            <div class="footer-info">
+                <h4>Contact</h4>
+                <p>Phone: (123) 456-7890</p>
+                <p>Email: contact@pizzakebab.com</p>
             </div>
         </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Gourmet Pizza & Kebab. All rights reserved.</p>
+        </div>
+    </footer>
 
-        <script src="js/main.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

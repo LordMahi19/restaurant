@@ -11,25 +11,25 @@
 
 <body>
     <header>
-        <div class="logo">
-            <h1>Gourmet Pizza & Kebab</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
+        <nav style="flex: 1; display: flex; justify-content: center;">
+            <ul style="display: flex; gap: 20px; list-style: none; padding: 0; margin: 0;">
                 <li><a href="menu.html">Menu</a></li>
-                <li><a href="custom.html">Custom Order</a></li>
-                <li><a href="contact.html">Contact Us</a></li>
+                <li><a href="custom.html" class="active">Custom Order</a></li>
+
+                <li><a href="admin.html">Staff Login</a></li>
             </ul>
         </nav>
+        <div id="cart-indicator" style="cursor:pointer;" onclick="toggleCart()">Cart (0)</div>
     </header>
 
     <main class="container">
-        <h1>Create Your Own Pizza</h1>
 
-        <div class="custom-section">
+
+        <!-- ... content remains the same ... -->
+        <div class="custom-section" style="margin-top: 20px;">
+            <!-- (Content from line 29 to 68) -->
             <!-- Size Selection -->
-            <h3>1. Choose Size</h3>
+
             <div class="size-selector">
                 <div class="radio-group">
                     <label><input type="radio" name="size" value="small" data-price="8" checked> Small (8") -
@@ -40,42 +40,31 @@
             </div>
 
             <!-- Drinks Trigger -->
-            <h3>2. Add Drinks</h3>
-            <button class="btn" onclick="openDrinksPopup()">Select Drinks</button>
-            <div id="selected-drinks-list" style="margin-top: 10px; color: #ccc;"></div>
 
-            <!-- Toppings Selection -->
-            <h3>3. Select Toppings</h3>
-            <div class="toppings-section">
-                <label for="topping-category">Category:</label>
-                <select id="topping-category" onchange="showToppingsByCategory()"
-                    style="padding: 8px; border-radius: 4px;">
-                    <option value="">-- Select Category --</option>
-                    <option value="meat">Meat</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="cheese">Cheese</option>
-                    <option value="spice">Spice</option>
-                </select>
-
-                <div id="toppings-list"
-                    style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-                    <!-- Toppings checkboxes injected here -->
+            <!-- Selections Grid -->
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
+                <div>
+                    <button class="btn" style="width: 100%;" onclick="openDrinksPopup()">Select Drinks</button>
+                    <div id="selected-drinks-list"
+                        style="margin-top: 10px; color: var(--text-muted); font-size: 0.9em;"></div>
+                </div>
+                <div>
+                    <button class="btn" style="width: 100%;" onclick="openToppingsPopup()">Select Toppings</button>
+                    <div id="selected-toppings-list"
+                        style="margin-top: 10px; color: var(--text-muted); font-size: 0.9em;"></div>
+                </div>
+                <div>
+                    <button class="btn" style="width: 100%;" onclick="openDipsPopup()">Select Dips</button>
+                    <div id="selected-dips-list" style="margin-top: 10px; color: var(--text-muted); font-size: 0.9em;">
+                    </div>
+                </div>
+                <div>
+                    <button class="btn" style="width: 100%;" onclick="openSaucesPopup()">Select Sauces</button>
+                    <div id="selected-sauces-list"
+                        style="margin-top: 10px; color: var(--text-muted); font-size: 0.9em;"></div>
                 </div>
             </div>
-
-            <!-- Dip Selector -->
-            <h3>4. Choose Dip</h3>
-            <select id="dip-selector" style="padding: 8px; border-radius: 4px; width: 100%;">
-                <option value="">None</option>
-                <!-- Dips injected here -->
-            </select>
-
-            <!-- Sauce Selector -->
-            <h3>5. Choose Sauce</h3>
-            <select id="sauce-selector" style="padding: 8px; border-radius: 4px; width: 100%;">
-                <option value="">None</option>
-                <!-- Sauces injected here -->
-            </select>
 
             <hr style="border-top: 1px solid var(--glass-border); margin: 30px 0;">
 
@@ -89,18 +78,127 @@
         </div>
     </main>
 
-    <!-- Drinks Popup -->
-    <div id="drinks-popup" class="popup">
+    <!-- Cart Popup (Simplified) -->
+    <div id="cart-popup" class="popup">
         <div class="popup-header">
-            <h2>Select Drinks</h2>
-            <button class="close-btn" onclick="closeDrinksPopup()">&times;</button>
+            <h2>Your Cart</h2>
+            <button class="close-btn" onclick="toggleCart()">&times;</button>
         </div>
-        <div id="drinks-list-popup" style="max-height: 300px; overflow-y: auto;">
-            <!-- Drinks list w/ quantity -->
+        <div id="cart-items">
+            <!-- Cart items here -->
         </div>
-        <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeDrinksPopup()">Done</button>
+        <div style="margin-top: 20px; text-align: right;">
+            <strong>Total: $<span id="cart-total">0.00</span></strong>
+            <br><br>
+            <button class="btn" onclick="checkout()">Checkout</button>
+        </div>
     </div>
 
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>Checkout</h2>
+            <form id="checkout-form" onsubmit="submitOrder(event)">
+                <div class="size-selector" style="margin-bottom: 25px;">
+                    <div class="radio-group" style="display: flex; gap: 10px; justify-content: center;">
+                        <label style="flex: 1; text-align: center; margin: 0;">
+                            <input type="radio" name="orderType" value="delivery" checked onclick="toggleAddress(true)">
+                            Delivery
+                        </label>
+                        <label style="flex: 1; text-align: center; margin: 0;">
+                            <input type="radio" name="orderType" value="pickup" onclick="toggleAddress(false)">
+                            Pickup
+                        </label>
+                    </div>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="text" id="cust-name" placeholder="Full Name" required>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="tel" id="cust-phone" placeholder="Phone Number" required>
+                </div>
+                <div id="address-field" style="margin-bottom:15px;">
+                    <input type="text" id="cust-address" placeholder="Delivery Address" required>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <textarea id="cust-note" placeholder="Note (optional)" style="height: 100px;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn" style="flex: 1; opacity: 0.8;"
+                        onclick="closeCheckoutModal()">Cancel</button>
+                    <button type="submit" class="btn" style="flex: 2;">Place Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Drinks Popup -->
+    <div id="drinks-popup" class="modal" style="display: none;">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="popup-header">
+                <h2>Select Drinks</h2>
+                <button class="close-btn" onclick="closeDrinksPopup()">&times;</button>
+            </div>
+            <div id="drinks-list-popup" style="margin-top: 20px;"></div>
+            <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeDrinksPopup()">Done</button>
+        </div>
+    </div>
+
+    <!-- Toppings Popup -->
+    <div id="toppings-popup" class="modal" style="display: none;">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="popup-header">
+                <h2>Select Toppings</h2>
+                <button class="close-btn" onclick="closeToppingsPopup()">&times;</button>
+            </div>
+            <div id="toppings-list-popup" style="margin-top: 20px;"></div>
+            <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeToppingsPopup()">Done</button>
+        </div>
+    </div>
+
+    <!-- Dips Popup -->
+    <div id="dips-popup" class="modal" style="display: none;">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="popup-header">
+                <h2>Select Dips</h2>
+                <button class="close-btn" onclick="closeDipsPopup()">&times;</button>
+            </div>
+            <div id="dips-list-popup" style="margin-top: 20px;"></div>
+            <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeDipsPopup()">Done</button>
+        </div>
+    </div>
+
+    <!-- Sauces Popup -->
+    <div id="sauces-popup" class="modal" style="display: none;">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="popup-header">
+                <h2>Select Sauces</h2>
+                <button class="close-btn" onclick="closeSaucesPopup()">&times;</button>
+            </div>
+            <div id="sauces-list-popup" style="margin-top: 20px;"></div>
+            <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeSaucesPopup()">Done</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <h4>Visit Us</h4>
+                <p>123 Pizza Street, Food City</p>
+                <p>Open Daily: 11am - 11pm</p>
+            </div>
+            <div class="footer-info">
+                <h4>Contact</h4>
+                <p>Phone: (123) 456-7890</p>
+                <p>Email: contact@pizzakebab.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Gourmet Pizza & Kebab. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
     <script src="js/custom.js"></script>
 </body>
 

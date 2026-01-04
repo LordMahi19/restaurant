@@ -1,6 +1,7 @@
 let allItems = [];
 let activeFilters = new Set();
 let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+const categories = ['pizza', 'kebab', 'rulla', 'salad', 'drinks', 'desserts'];
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchMenu();
@@ -30,6 +31,7 @@ function toggleFilter(filter) {
 
 function renderMenu() {
     const container = document.getElementById('menu-container');
+    if (!container) return; // Exit if not on menu page
     container.innerHTML = '';
 
     categories.forEach(category => {
@@ -57,7 +59,7 @@ function renderMenu() {
         section.innerHTML = `
             <div class="category-header" onclick="toggleCategory('${category}')">
                 <h2>${capitalize(category)} <span style="font-size: 0.8em; opacity: 0.7;">(${catItems.length})</span></h2>
-                <span id="icon-${category}">+</span>
+                <span id="icon-${category}" class="icon">+</span>
             </div>
             <div class="category-content" id="content-${category}">
                 ${catItems.map(item => createMenuItemCard(item)).join('')}
@@ -92,6 +94,7 @@ function toggleCategory(category) {
 }
 
 function capitalize(s) {
+    if (s === 'rulla') return 'Rolls';
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
@@ -113,12 +116,12 @@ function updateCartUI() {
     // Update popup table
     const cartItems = document.getElementById('cart-items');
     cartItems.innerHTML = cart.map((item, index) => `
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items: center;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:12px; align-items: center; padding: 12px; background: rgba(0,0,0,0.03); border-radius: 12px;">
             <div style="display:flex; flex-direction:column;">
-                <span>${item.name}</span>
-                <span style="font-size:0.8em; opacity:0.7;">$${item.price.toFixed(2)}</span>
+                <span style="font-weight: 600; color: var(--text-main);">${item.name}</span>
+                <span style="font-size:0.85em; color: var(--accent-color); font-weight: 500;">$${item.price.toFixed(2)}</span>
             </div>
-            <span style="cursor:pointer; color:red; font-size:1.2em;" onclick="removeFromCart(${index})">&times;</span>
+            <span style="cursor:pointer; color: #ff7675; font-size:1.5rem; line-height: 1;" onclick="removeFromCart(${index})">&times;</span>
         </div>
     `).join('');
 
@@ -133,6 +136,9 @@ function toggleCart() {
 
 function checkout() {
     if (cart.length === 0) return alert("Cart is empty");
+
+    // Close Cart when opening checkout
+    toggleCart();
 
     // Open Modal
     document.getElementById('checkout-modal').style.display = 'flex';
