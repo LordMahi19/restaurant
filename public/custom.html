@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant - Custom Order</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1 style="margin:0; font-size: 1.5rem; color: var(--accent-color);">Gourmet Pizza & Kebab</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="custom.html" style="color: var(--accent-color);">Custom Order</a></li>
+                <li><a href="contact.html">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Create Your Own Pizza</h1>
+
+        <div class="custom-section">
+            <!-- Size Selection -->
+            <h3>1. Choose Size</h3>
+            <div class="size-selector">
+                <div class="radio-group">
+                    <label><input type="radio" name="size" value="small" data-price="8" checked> Small (8") -
+                        $8.00</label>
+                    <label><input type="radio" name="size" value="medium" data-price="10"> Medium (10") - $10.00</label>
+                    <label><input type="radio" name="size" value="large" data-price="12"> Large (12") - $12.00</label>
+                </div>
+            </div>
+
+            <!-- Drinks Trigger -->
+            <h3>2. Add Drinks</h3>
+            <button class="btn" onclick="openDrinksPopup()">Select Drinks</button>
+            <div id="selected-drinks-list" style="margin-top: 10px; color: #ccc;"></div>
+
+            <!-- Toppings Selection -->
+            <h3>3. Select Toppings</h3>
+            <div class="toppings-section">
+                <label for="topping-category">Category:</label>
+                <select id="topping-category" onchange="showToppingsByCategory()"
+                    style="padding: 8px; border-radius: 4px;">
+                    <option value="">-- Select Category --</option>
+                    <option value="meat">Meat</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="cheese">Cheese</option>
+                    <option value="spice">Spice</option>
+                </select>
+
+                <div id="toppings-list"
+                    style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                    <!-- Toppings checkboxes injected here -->
+                </div>
+            </div>
+
+            <!-- Dip Selector -->
+            <h3>4. Choose Dip</h3>
+            <select id="dip-selector" style="padding: 8px; border-radius: 4px; width: 100%;">
+                <option value="">None</option>
+                <!-- Dips injected here -->
+            </select>
+
+            <!-- Sauce Selector -->
+            <h3>5. Choose Sauce</h3>
+            <select id="sauce-selector" style="padding: 8px; border-radius: 4px; width: 100%;">
+                <option value="">None</option>
+                <!-- Sauces injected here -->
+            </select>
+
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 30px 0;">
+
+            <!-- Total and Breakdown -->
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div id="breakdown"></div>
+                <h2 style="color: var(--accent-color);">Total: $<span id="total-price">8.00</span></h2>
+                <button class="btn" onclick="addToCartCustom()">Add to Cart</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Drinks Popup -->
+    <div id="drinks-popup" class="popup">
+        <div class="popup-header">
+            <h2>Select Drinks</h2>
+            <button class="close-btn" onclick="closeDrinksPopup()">&times;</button>
+        </div>
+        <div id="drinks-list-popup" style="max-height: 300px; overflow-y: auto;">
+            <!-- Drinks list w/ quantity -->
+        </div>
+        <button class="btn" style="width: 100%; margin-top: 20px;" onclick="closeDrinksPopup()">Done</button>
+    </div>
+
+    <script src="js/custom.js"></script>
+</body>
+
+</html>
