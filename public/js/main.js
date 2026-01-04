@@ -112,10 +112,13 @@ function updateCartUI() {
 
     // Update popup table
     const cartItems = document.getElementById('cart-items');
-    cartItems.innerHTML = cart.map(item => `
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-            <span>${item.name}</span>
-            <span>$${item.price.toFixed(2)}</span>
+    cartItems.innerHTML = cart.map((item, index) => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items: center;">
+            <div style="display:flex; flex-direction:column;">
+                <span>${item.name}</span>
+                <span style="font-size:0.8em; opacity:0.7;">$${item.price.toFixed(2)}</span>
+            </div>
+            <span style="cursor:pointer; color:red; font-size:1.2em;" onclick="removeFromCart(${index})">&times;</span>
         </div>
     `).join('');
 
@@ -131,25 +134,65 @@ function toggleCart() {
 function checkout() {
     if (cart.length === 0) return alert("Cart is empty");
 
+    // Open Modal
+    document.getElementById('checkout-modal').style.display = 'flex';
+}
+
+function closeCheckoutModal() {
+    document.getElementById('checkout-modal').style.display = 'none';
+}
+
+function toggleAddress(show) {
+    const el = document.getElementById('address-field');
+    const input = document.getElementById('cust-address');
+    if (show) {
+        el.style.display = 'block';
+        input.required = true;
+    } else {
+        el.style.display = 'none';
+        input.required = false;
+    }
+}
+
+function submitOrder(e) {
+    e.preventDefault();
+    if (cart.length === 0) return alert("Cart is empty");
+
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const address = document.getElementById('cust-address').value;
+    const note = document.getElementById('cust-note').value;
+    const orderType = document.querySelector('input[name="orderType"]:checked').value;
+
+    const customer = { name, phone, address, note, type: orderType };
+
     // Send order to backend
+    // Logic: backend will recalculate price, but we send our calc just in case (ignored by secure backend)
     const total = cart.reduce((acc, item) => acc + item.price, 0);
-    const details = JSON.stringify(cart);
 
     fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ details, totalPrice: total })
+        body: JSON.stringify({ details: cart, totalPrice: total, customer })
     })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert("Order placed! Order ID: " + data.orderId);
+                // Redirect to success page
                 cart = [];
                 localStorage.setItem('restaurant_cart', '[]');
                 updateCartUI();
-                toggleCart();
+                closeCheckoutModal();
+                toggleCart(); // Close cart popup
+                window.location.href = `order-success.html?id=${data.orderId}`;
             } else {
                 alert("Failed to place order.");
             }
         });
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('restaurant_cart', JSON.stringify(cart));
+    updateCartUI();
 }

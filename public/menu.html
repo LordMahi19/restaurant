@@ -56,6 +56,38 @@
             <br><br>
             <button class="btn" onclick="checkout()">Checkout</button>
         </div>
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:white; padding:20px; border-radius:8px; width:90%; max-width:500px; color:black;">
+            <h2>Checkout</h2>
+            <form id="checkout-form" onsubmit="submitOrder(event)">
+                <div style="margin-bottom:10px;">
+                    <label>Order Type:</label>
+                    <label><input type="radio" name="orderType" value="delivery" checked onclick="toggleAddress(true)"> Delivery</label>
+                    <label><input type="radio" name="orderType" value="pickup" onclick="toggleAddress(false)"> Pickup</label>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Name:</label>
+                    <input type="text" id="cust-name" required style="width:100%; padding:5px; margin-top:5px;">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Phone:</label>
+                    <input type="tel" id="cust-phone" required style="width:100%; padding:5px; margin-top:5px;">
+                </div>
+                <div id="address-field" style="margin-bottom:10px;">
+                    <label>Address:</label>
+                    <input type="text" id="cust-address" required style="width:100%; padding:5px; margin-top:5px;">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Note (optional):</label>
+                    <textarea id="cust-note" style="width:100%; padding:5px; margin-top:5px;"></textarea>
+                </div>
+                <div style="text-align:right;">
+                    <button type="button" class="btn" style="background:#555;" onclick="closeCheckoutModal()">Cancel</button>
+                    <button type="submit" class="btn">Place Order</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="js/main.js"></script>

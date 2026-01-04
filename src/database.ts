@@ -1,4 +1,5 @@
 import sqlite3 from 'sqlite3';
+import bcrypt from 'bcryptjs';
 
 
 const dbPath = './restaurant.db';
@@ -22,7 +23,12 @@ function initDb() {
         )`);
 
         // Insert default admin if not exists (admin/admin)
-        db.run(`INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)`, ['admin', 'admin']);
+        db.get("SELECT * FROM users WHERE username = 'admin'", async (err, row) => {
+            if (!row) {
+                const hashedPassword = await bcrypt.hash('admin', 10);
+                db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, ['admin', hashedPassword]);
+            }
+        });
 
         // Menu Items table
         db.run(`CREATE TABLE IF NOT EXISTS menu_items (
@@ -37,13 +43,17 @@ function initDb() {
         // Tags: 'beef', 'chicken', 'vegetarian', etc.
         // Category: 'pizza', 'kebab', 'rulla', 'salad', 'drinks', 'desserts'
 
-        // Orders table
         db.run(`CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             details TEXT, -- JSON string of items
             total_price REAL,
             status TEXT DEFAULT 'pending',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            customer_name TEXT,
+            customer_phone TEXT,
+            customer_address TEXT,
+            customer_note TEXT,
+            type TEXT
         )`);
 
         // Ingredients table (for custom orders)
@@ -65,15 +75,15 @@ function initDb() {
 
 function seedData() {
     const items = [
-        { name: 'Beef Pizza', description: 'Delicious beef pizza', price: 12.0, category: 'pizza', tags: 'beef', image_url: 'https://placehold.co/100x100' },
-        { name: 'Chicken Pizza', description: 'Tasty chicken pizza', price: 11.0, category: 'pizza', tags: 'chicken', image_url: 'https://placehold.co/100x100' },
-        { name: 'Veggie Pizza', description: 'Fresh vegetable pizza', price: 10.0, category: 'pizza', tags: 'vegetarian', image_url: 'https://placehold.co/100x100' },
-        { name: 'Kebab Plate', description: 'Kebab with fries', price: 13.0, category: 'kebab', tags: 'beef', image_url: 'https://placehold.co/100x100' },
-        { name: 'Chicken Kebab', description: 'Chicken kebab', price: 13.0, category: 'kebab', tags: 'chicken', image_url: 'https://placehold.co/100x100' },
-        { name: 'Rulla Kebab', description: 'Rolled kebab', price: 11.5, category: 'rulla', tags: 'beef', image_url: 'https://placehold.co/100x100' },
-        { name: 'Greek Salad', description: 'Fresh salad', price: 8.0, category: 'salad', tags: 'vegetarian', image_url: 'https://placehold.co/100x100' },
-        { name: 'Cola', description: 'Cold drink', price: 3.0, category: 'drinks', tags: '', image_url: 'https://placehold.co/100x100' },
-        { name: 'Ice Cream', description: 'Vanilla ice cream', price: 4.0, category: 'desserts', tags: 'vegetarian', image_url: 'https://placehold.co/100x100' },
+        { name: 'Beef Pizza', description: 'Delicious beef pizza', price: 12.0, category: 'pizza', tags: 'beef', image_url: '/images/menu/beef-pizza.jpg' },
+        { name: 'Chicken Pizza', description: 'Tasty chicken pizza', price: 11.0, category: 'pizza', tags: 'chicken', image_url: '/images/menu/chicken-pizza.jpg' },
+        { name: 'Veggie Pizza', description: 'Fresh vegetable pizza', price: 10.0, category: 'pizza', tags: 'vegetarian', image_url: '/images/menu/veggie-pizza.jpg' },
+        { name: 'Kebab Plate', description: 'Kebab with fries', price: 13.0, category: 'kebab', tags: 'beef', image_url: '/images/menu/kebab-plate.jpg' },
+        { name: 'Chicken Kebab', description: 'Chicken kebab', price: 13.0, category: 'kebab', tags: 'chicken', image_url: '/images/menu/chicken-kebab.jpg' },
+        { name: 'Rulla Kebab', description: 'Rolled kebab', price: 11.5, category: 'rulla', tags: 'beef', image_url: '/images/menu/rulla-kebab.jpg' },
+        { name: 'Greek Salad', description: 'Fresh salad', price: 8.0, category: 'salad', tags: 'vegetarian', image_url: '/images/menu/greek-salad.jpg' },
+        { name: 'Cola', description: 'Cold drink', price: 3.0, category: 'drinks', tags: '', image_url: '/images/menu/cola.jpg' },
+        { name: 'Ice Cream', description: 'Vanilla ice cream', price: 4.0, category: 'desserts', tags: 'vegetarian', image_url: '/images/menu/ice-cream.jpg' },
     ];
 
     const insert = db.prepare(`INSERT INTO menu_items (name, description, price, category, tags, image_url) VALUES (?, ?, ?, ?, ?, ?)`);
@@ -124,12 +134,15 @@ export function getIngredients() {
     });
 }
 
-export function addOrder(details: string, totalPrice: number) {
+export function addOrder(details: string, totalPrice: number, customer: any) {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO orders (details, total_price) VALUES (?, ?)", [details, totalPrice], function (err) {
-            if (err) reject(err);
-            else resolve(this.lastID);
-        });
+        const { name, phone, address, note, type } = customer;
+        db.run(`INSERT INTO orders (details, total_price, customer_name, customer_phone, customer_address, customer_note, type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [details, totalPrice, name, phone, address, note, type], function (err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+            });
     });
 }
 
@@ -151,12 +164,31 @@ export function updateOrderStatus(id: number, status: string) {
     });
 }
 
-export function addMenuItem(name: string, category: string, price: number, tags: string, description: string = '') {
+export function addMenuItem(name: string, category: string, price: number, tags: string, description: string = '', imageUrl: string = '') {
     return new Promise((resolve, reject) => {
-        db.run("INSERT INTO menu_items (name, category, price, tags, description) VALUES (?, ?, ?, ?, ?)",
-            [name, category, price, tags, description], function (err) {
+        db.run("INSERT INTO menu_items (name, category, price, tags, description, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+            [name, category, price, tags, description, imageUrl], function (err) {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });
+    });
+}
+
+export function updateMenuItem(id: number, name: string, category: string, price: number, tags: string, description: string) {
+    return new Promise((resolve, reject) => {
+        db.run("UPDATE menu_items SET name = ?, category = ?, price = ?, tags = ?, description = ? WHERE id = ?",
+            [name, category, price, tags, description, id], function (err) {
+                if (err) reject(err);
+                else resolve(true);
+            });
+    });
+}
+
+export function deleteMenuItem(id: number) {
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM menu_items WHERE id = ?", [id], function (err) {
+            if (err) reject(err);
+            else resolve(true);
+        });
     });
 }
