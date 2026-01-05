@@ -64,6 +64,20 @@ function initDb() {
             price REAL
         )`);
 
+        // Categories table
+        db.run(`CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            display_order INTEGER
+        )`);
+
+        // Tags table
+        db.run(`CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            display_order INTEGER
+        )`);
+
         // Seed simple data if empty
         db.get("SELECT count(*) as count FROM menu_items", (err, row: any) => {
             if (row && row.count === 0) {
@@ -71,12 +85,43 @@ function initDb() {
             }
         });
 
+
         db.get("SELECT count(*) as count FROM ingredients", (err, row: any) => {
             if (row && row.count === 0) {
                 seedIngredients();
             }
         });
+
+        db.get("SELECT count(*) as count FROM categories", (err, row: any) => {
+            if (row && row.count === 0) {
+                seedCategories();
+            }
+        });
+
+        db.get("SELECT count(*) as count FROM tags", (err, row: any) => {
+            if (row && row.count === 0) {
+                seedTags();
+            }
+        });
     });
+}
+
+function seedCategories() {
+    const categories = [
+        { name: 'pizza', order: 1 },
+        { name: 'kebab', order: 2 },
+        { name: 'rulla', order: 3 },
+        { name: 'salad', order: 4 },
+        { name: 'drinks', order: 5 },
+        { name: 'desserts', order: 6 }
+    ];
+
+    const insert = db.prepare(`INSERT INTO categories (name, display_order) VALUES (?, ?)`);
+    categories.forEach(cat => {
+        insert.run(cat.name, cat.order);
+    });
+    insert.finalize();
+    console.log("Seeded categories.");
 }
 
 function seedMenuItems() {
@@ -196,6 +241,79 @@ export function updateMenuItem(id: number, name: string, category: string, price
 export function deleteMenuItem(id: number) {
     return new Promise((resolve, reject) => {
         db.run("DELETE FROM menu_items WHERE id = ?", [id], function (err) {
+            if (err) reject(err);
+            else resolve(true);
+        });
+    });
+
+
+
+}
+
+export function getAllCategories() {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM categories ORDER BY display_order ASC", [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+}
+
+export function addCategory(name: string) {
+    return new Promise((resolve, reject) => {
+        db.get("SELECT MAX(display_order) as maxOrder FROM categories", (err, row: any) => {
+            const nextOrder = (row && row.maxOrder) ? row.maxOrder + 1 : 1;
+            db.run("INSERT INTO categories (name, display_order) VALUES (?, ?)", [name.toLowerCase(), nextOrder], function (err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+            });
+        });
+    });
+}
+
+// --- Dynamic Tag Management ---
+
+export function seedTags() {
+    const tags = [
+        { name: 'beef', order: 1 },
+        { name: 'chicken', order: 2 },
+        { name: 'halal', order: 3 },
+        { name: 'spicy', order: 4 },
+        { name: 'vegan', order: 5 }
+    ];
+
+    const insert = db.prepare(`INSERT INTO tags (name, display_order) VALUES (?, ?)`);
+    tags.forEach(tag => {
+        insert.run(tag.name, tag.order);
+    });
+    insert.finalize();
+    console.log("Seeded tags.");
+}
+
+export function getAllTags() {
+    return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM tags ORDER BY display_order ASC", [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+}
+
+export function addTag(name: string) {
+    return new Promise((resolve, reject) => {
+        db.get("SELECT MAX(display_order) as maxOrder FROM tags", (err, row: any) => {
+            const nextOrder = (row && row.maxOrder) ? row.maxOrder + 1 : 1;
+            db.run("INSERT INTO tags (name, display_order) VALUES (?, ?)", [name.toLowerCase(), nextOrder], function (err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+            });
+        });
+    });
+}
+
+export function deleteTag(id: number) {
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM tags WHERE id = ?", [id], function (err) {
             if (err) reject(err);
             else resolve(true);
         });

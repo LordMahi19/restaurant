@@ -1,12 +1,43 @@
 let allItems = [];
 let activeFilters = new Set();
 let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
-const categories = ['pizza', 'kebab', 'rulla', 'salad', 'drinks', 'desserts'];
+let categories = [];
+let allTags = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([
+        fetchCategories(),
+        fetchTags()
+    ]);
     fetchMenu();
     updateCartUI(); // Update UI immediately
 });
+
+async function fetchTags() {
+    try {
+        const res = await fetch('/api/tags');
+        allTags = await res.json();
+        renderFilters();
+    } catch (err) {
+        console.error('Failed to load tags', err);
+    }
+}
+
+function renderFilters() {
+    const container = document.getElementById('filters-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    allTags.forEach(tagObj => {
+        const filter = tagObj.name;
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn' + (activeFilters.has(filter) ? ' active' : '');
+        btn.dataset.filter = filter;
+        btn.textContent = capitalize(filter);
+        btn.onclick = () => toggleFilter(filter);
+        container.appendChild(btn);
+    });
+}
 
 async function fetchMenu() {
     try {
@@ -15,6 +46,15 @@ async function fetchMenu() {
         renderMenu();
     } catch (err) {
         console.error('Failed to load menu', err);
+    }
+}
+
+async function fetchCategories() {
+    try {
+        const res = await fetch('/api/categories');
+        categories = (await res.json()).map(c => c.name);
+    } catch (err) {
+        console.error('Failed to load categories', err);
     }
 }
 

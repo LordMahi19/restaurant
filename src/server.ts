@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import bcrypt from 'bcryptjs';
-import { db, getAllMenuItems, getIngredients, addOrder, getOrders, updateOrderStatus, addMenuItem, updateMenuItem, deleteMenuItem } from './database';
+import { db, getAllMenuItems, getIngredients, addOrder, getOrders, updateOrderStatus, addMenuItem, updateMenuItem, deleteMenuItem, getAllCategories, addCategory, getAllTags, addTag, deleteTag } from './database';
 
 const app = express();
 const port = 3000;
@@ -18,6 +18,16 @@ app.get('/api/menu', async (req, res) => {
         res.json(items);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch menu items' });
+    }
+});
+
+// Get all categories
+app.get('/api/categories', async (req, res) => {
+    try {
+        const categories = await getAllCategories();
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
     }
 });
 
@@ -83,6 +93,49 @@ app.post('/api/menu', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to add item' });
+    }
+});
+
+// Add Category (Admin)
+app.post('/api/categories', async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ error: 'Name is required' });
+        await addCategory(name);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to add category' });
+    }
+});
+
+// --- Tags API ---
+
+app.get('/api/tags', async (req, res) => {
+    try {
+        const tags = await getAllTags();
+        res.json(tags);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch tags' });
+    }
+});
+
+app.post('/api/tags', async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ error: 'Name is required' });
+        await addTag(name);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to add tag' });
+    }
+});
+
+app.delete('/api/tags/:id', async (req, res) => {
+    try {
+        await deleteTag(Number(req.params.id));
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete tag' });
     }
 });
 
